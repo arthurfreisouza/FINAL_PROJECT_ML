@@ -1,0 +1,15 @@
+\section*{Introdução}
+O trabalho visa resolver um problema de classificação binária levantado pelo Jardim Comunitário Raízes Vivas, focando no uso de técnicas de Machine Learning e pré-processamento de dados.
+O objetivo é desenvolver um modelo preditivo capaz de determinar o \textbf{`support\_outcome`} para membros do programa, classificando-o como "bom" (good) ou "ruim" (bad).
+
+Para realizar esta tarefa, utilizamos um conjunto de dados de treinamento fornecido no moodle (800 amostras e 21 atributos), detalhando o perfil demográfico, financeiro e histórico de participação de cada membro.
+Este relatório detalha a metodologia de pré-processamento, a seleção de atributos e a subsequente implementação e ajuste de quatro modelos de classificação distintos:
+
+\begin{itemize}
+    \item Árvore de Decisão (Decision Tree)
+    \item Floresta Aleatória (Random Forest)
+    \item Aumento de Gradiente (Gradient Boosting)
+    \item Classificador Bayesiano (Gaussian Naive Bayes)
+\end{itemize}
+
+Os modelos são avaliados usando validação cruzada (K-Fold Cross-Validation com k=5) e comparados com base nas métrica acurácia e a AUC de cada modelo. Para encontrar o melhor modelo de cada algorítmo, a técnica de grid-search também foi aplicada.

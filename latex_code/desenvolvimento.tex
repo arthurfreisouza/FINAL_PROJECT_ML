@@ -1,0 +1,77 @@
+\section*{Desenvolvimento}
+
+O desenvolvimento do projeto foi dividido em três etapas principais: pré-processamento dos dados, definição das métricas de avaliação e, por fim, o treinamento e otimização dos modelos.
+
+\subsection*{1. Pré-processamento e Análise}
+A qualidade dos dados de entrada é fundamental para o desempenho do modelo, sendo assim, fiz uma análise das colunas para extrair o máximo de informação possivel.
+
+\paragraph{Tratamento de Dados Ausentes:} Uma análise inicial revelou que o atributo \texttt{other\_support\_plans} continha 649 valores ausentes em 800 amostras (mais de 81\%).
+Devido ao grande numero de valores faltantes, usar eles como input seria pouco confiável.
+Portanto, esta coluna foi removida do conjunto de dados.
+
+\paragraph{Análise da Variável target:} A variável target \texttt{support\_outcome} mostrou-se desbalanceada, com 70\% das amostras classificadas como "good" e 30\% como "bad".
+
+\paragraph{Codificação de Atributos Categóricos:} Os atributos categóricos foram tratados de acordo 
+com sua natureza (nominal ou ordinal) usando um \texttt{ColumnTransformer} do Scikit-learn.
+\begin{itemize}
+    \item \textbf{Atributos Ordinais:} Atributos com uma ordem intrínseca (ex: \texttt{garden\_points\_status}, \texttt{personal\_reserve\_status}, \texttt{role\_skill\_tier}) foram codificados usando \texttt{OrdinalEncoder} para preservar sua relação de classificação.
+    \item \textbf{Atributos Nominais:} Atributos sem ordem (ex: \texttt{project\_focus\_code}, \texttt{housing\_situation}) foram codificados usando \texttt{OneHotEncoder} para criar variáveis "dummy".
+\end{itemize}
+Os atributos numéricos foram mantidos em sua escala original (\texttt{passthrough}), pois os modelos baseados em árvore não são sensíveis à escala dos atributos. O \texttt{id} foi removido. O dataset processado final contém 48 atributos.
+\vspace{10mm}
+\subsection*{2. Métricas de Avaliação}
+No fito de comparar os modelos, utilizamos duas métricas padrão para classificação.
+
+\paragraph{Acurácia (Accuracy):} Mede a proporção de previsões corretas sobre o total. É definida como:
+$$ \text{Acurácia} = \frac{VP + VN}{VP + VN + FP + FN} $$
+Onde $VP$ (Verdadeiro Positivo) e $VN$ (Verdadeiro Negativo) são as classificações corretas, e $FP$ (Falso Positivo) e $FN$ (Falso Negativo) são os erros.
+
+\paragraph{Área sob a Curva ROC (AUC-ROC):} A AUC-ROC é uma medida robusta utilizada em problemas de classificação, gerada ao variar o threshold de um classificador e calculando a área da curva final. A curva ROC plota a Taxa de Verdadeiros Positivos (TPR) contra a Taxa de Falsos Positivos (FPR) em vários limiares de decisão, sendo mais próximo de 1 melhor.
+$$ \text{TPR (Sensibilidade)} = \frac{VP}{VP + FN} $$
+$$ \text{FPR} = \frac{FP}{FP + VN} $$
+Iremos sempre comparar a AUC em relação ao modelo aleatório, considerando-se que ele terá AUC de 0.5. Se for maior que 0.5, representa que o modelo tem alguma capacidade preditiva melhor que o modelo randomico.
+\vspace{10mm}
+\subsection*{3. Modelos Baseados em Árvore}
+Estes modelos funcionam dividindo sequencialmente os dados com base nos limiares dos atributos. A "qualidade" de uma divisão é medida por critérios de impureza (Gini ou Entropia).
+
+\subsubsection*{Modelo 1: Árvore de Decisão}
+Uma única árvore de decisão foi treinada e otimizada via \texttt{GridSearchCV}.
+O modelo atingiu uma \textbf{Acurácia Cross-Validation de 0.6800}  e uma \textbf{AUC de 0.68}.
+Este desempenho, o mais baixo entre os modelos testados, é esperado, pois árvores únicas tendem a ter alta variância e sobreajustar (overfit) aos dados de treino. Sendo assim, a idéia do trabalho foi testar algoritmos como o Random Forest, que irão reduzir essa variância das árvores de decisão.
+\vspace{5mm}
+\subsubsection*{Modelo 2: Floresta Aleatória (Random Forest)}
+Este modelo de ensemble (ensemble é a composição de N modelos para criar um preditor ou regressor final) reduz a variância ao construir múltiplas árvores de decisão em subconjuntos aleatórios dos dados e atributos.
+Após a otimização com \texttt{GridSearchCV}, o modelo alcançou a maior performance geral: uma \textbf{Acurácia Cross-Validation de 0.7525}  e uma \textbf{AUC de 0.79}. 
+Os melhores hiperparâmetros encontrados foram: \texttt{'max\_depth': 10}, \texttt{'max\_features': 0.5}, \texttt{'min\_samples\_leaf': 1}, \texttt{'min\_samples\_split': 10}, \texttt{'n\_estimators': 200}.
+\vspace{5mm}
+\subsubsection*{Modelo 3: Aumento de Gradiente (Gradient Boosting)}
+Este modelo também de ensemble constrói árvores sequencialmente, onde cada nova árvore corrige os erros residuais da árvore anterior. Esse modelo tem como objetivo combinar weak learners para reduzir o viés de um modelo, diferentemente do Random Forest que tem como objetivo redzuria  variância das árvores.
+A otimização com \texttt{GridSearchCV} resultou em uma \textbf{Acurácia Cross-Validation de 0.7350}  e uma \textbf{AUC de 0.75}.
+Os melhores hiperparâmetros encontrados foram: \texttt{'learning\_rate': 0.05}, \texttt{'max\_depth': 10}, \texttt{'min\_samples\_leaf': 10}, \texttt{'min\_samples\_split': 10}, \texttt{'n\_estimators': 200}.
+\vspace{5mm}
+\subsection*{4. Modelo Probabilístico: Naive Bayes}
+Para fins de teste, utilizei um modelo simples e não baseado em árvores. O classificador Naive Bayes é um modelo probabilístico baseado no Teorema de Bayes, que assume que os atributos são independentes, resultando em um reduzido custo computacional. Esse modelo, por assumir dados independentes e geralmente gerados por distribuições normais, é considerado ter um alto viés.
+Utilizamos o \texttt{GaussianNB}, que assume que os atributos contínuos seguem uma distribuição normal.
+Este modelo foi notavelmente rápido, mas alcançou a menor \textbf{Acurácia Cross-Validation de 0.6663},e uma \textbf{AUC de 0.73}.
+\vspace{5mm}
+\subsection*{5. Análise Visual dos Resultados}
+As matrizes de confusão (Figuras 1 e 2) fornecem uma visão detalhada dos erros de cada modelo no conjunto de validação.
+A Figura 1(a) (Árvore de Decisão) mostra uma tendência em classificar "good" como "bad" (30 Falsos Negativos) com mais frequência do que o inverso (26 Falsos Positivos) , enquanto os modelos de ensemble (Figuras 1(b) e 2(a)) são mais balanceados.
+\newpage
+\begin{figure}[H]
+    \centering
+    \subfloat[Decision Tree (CV Acc: 0.680)]{\includegraphics[width=0.5\linewidth]{results/dt_confusion_matrix.png}\label{fig:conf_dt}}
+    \hfill
+    \subfloat[Random Forest (CV Acc: 0.753)]{\includegraphics[width=0.5\linewidth]{results/rf_confusion_matrix.png}\label{fig:conf_rf}}
+    \caption{Matrizes de Confusão: (a) Árvore de Decisão, (b) Floresta Aleatória}
+    \label{fig:conf_matrices1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \subfloat[Gradient Boosting (CV Acc: 0.735)]{\includegraphics[width=0.5\linewidth]{results/gb_confusion_matrix.png}\label{fig:conf_gb}}
+    \hfill
+    \subfloat[Gaussian Naive Bayes (CV Acc: 0.666)]{\includegraphics[width=0.5\linewidth]{results/gnb_confusion_matrix.png}\label{fig:conf_gnb}}
+    \caption{Matrizes de Confusão: (a) Gradient Boosting, (b) Gaussian Naive Bayes}
+    \label{fig:conf_matrices2}
+\end{figure}
