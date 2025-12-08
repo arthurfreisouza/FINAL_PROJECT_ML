@@ -1,0 +1,41 @@
+\section*{Conclusão}
+
+Esse projeto comparou 6 algoritmos de Machine Learning na tarefa de prever o resultado de suporte em um programa de horta comunitária.
+O pré-processamento foi realizando cuidadosamente, com a remoção de atributos contendo alguns dados ausentes (mais de 80\% na coluna other\_support\_plans) e o uso de codificadores ordinais e nominais foi crucial para o sucesso dos modelos.
+A avaliação dos modelos foi realizada usando validação cruzada de 5 folds (5-Fold CV) para Acurácia, e uma divisão de validação (20\% dos dados) para a geração da curva AUC. Os resultados são resumidos abaixo:
+
+\begin{center}
+\label{tab:resized}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l c c c c c}
+\toprule
+\textbf{Modelo} & \textbf{Acurácia Média (CV)} & \textbf{AUC (Validação)} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 score} \\
+\midrule
+Random Forest & 0.7437 & 0.7842 & 0.5714 & 0.2500 & 0.3478\\
+Gradient Boosting & 0.7578 & 0.7440 & 0.6551 & 0.3958 & 0.4935\\
+Decision Tree & 0.7031 & 0.6585 & 0.4722 & 0.3541 & 0.4047\\
+Gaussian Naive Bayes & 0.7312 & 0.7539 & 0.5128 & 0.4166 & 0.4597\\
+Support Vector Machine & 0.7281 & 0.6858 & 0.5416 & 0.2708 & 0.3611\\
+Voting Classifier & 0.7593 & 0.7812 & 0.6800 & 0.3541 & 0.4657\\
+\bottomrule
+\end{tabular}
+}
+\end{center}
+
+\subsection*{Análise dos Resultados}
+Os resultados confirmam o poder dos métodos de ensemble (Random Forest, Gradient Boosting e Voting Classifier), que superaram significativamente a Árvore de Decisão única.
+\textbf{Random Forest (0.7437)},  \textbf{Gradient Boosting (0.7578)} e \textbf{Voting Classifier (0.7593)} foram os modelos de melhor desempenho, alcançando as maiores acurácia em validação cruzada. \textbf{Random Forest (0.7842)} e \textbf{Voting Classifier (0.7812)} obtiveram as maiores AUC no conjunto de validação.
+
+A Figura \ref{fig:roc_comp} demonstra visualmente a superioridade do Random Forest. Sua curva (AUC 0.79) está notavelmente mais próxima do canto superior esquerdo, indicativo de ser um melhor classificador em comparação com o Gradient Boosting (0.75), Naive Bayes (0.73) e a Árvore de Decisão (0.68).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{results/all_models_roc_curve.png}
+    \caption{Comparação da Curva ROC para todos os modelos no conjunto de validação.}
+    \label{fig:roc_comp}
+\end{figure}
+
+\subsection*{Recomendação Final}
+Com base nesta análise, recomenda-se à coordenação do Jardim Comunitário Raízes Vivas a implementação do modelo \textbf{Random Forest} para a tarefa de previsão.
+
+Ele alcançou a 3ª maior acurácia em validação cruzada (0.7437)  e a maior AUC (0.7842)  no conjunto de validação, e também pode ser treinado em paralelo., demonstrando ser o modelo mais robusto e com melhor capacidade de generalização para este problema. O arquivo de submissão final \texttt{submission.csv} foi gerado pelo Random Forest.
